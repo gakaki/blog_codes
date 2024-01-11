@@ -1,0 +1,140 @@
+
+docker load < db.tar
+
+docker run -it --name web_servers -v /home/test/:/mnt/ -p 8088:8088  web_servers:2.0 /bin/bash
+
+
+docker images
+
+docker commit ce11ed87f21f web_servers:2.0
+
+
+docker save web_servers:2.0  -o  /home/web_servers.tar 
+docker save web_servers:2.0 >  /home/web_servers.tar 
+
+
+
+7XEm8uQa9mSM
+gakaki@gmail.com
+iloveNewipad3
+
+
+shms gms service  gms admin是hashbrown
+acp 是在 hashbrown上加了一层cache的
+
+export HTTP_PROXY=127.0.0.1:7890
+
+tsocks
+
+抱歉 用这么鲁莽的方式表达
+
+
+go-zero
+
+
+
+# MgStage 
+
+Girls M:M Videos
+Girls M:M Pics
+
+
+
+type Girls{
+    id : String
+    name: String
+    videos: [Video]
+}
+type Pic{
+    head: String
+    thumb: [String]
+    big: [String]
+}
+
+type Series{
+    id: String
+    name: String
+}
+
+tppe Comments {
+
+}
+type Company {
+
+    id : String
+    name: String
+
+}
+ 
+type Video{
+
+    id : String
+    name: String
+    girls: [Girls]
+
+    isCollection: boolean
+
+    pics: [Pic]
+
+    mp4: String
+
+    #title: String
+    description: String
+    comments: [String]
+
+    series: Series
+    timeLong: Int
+
+    company: [Company]
+}
+
+
+
+# leetcode
+
+
+enum Language{
+    
+}
+
+type Answer{
+    id: String
+    name: String
+    content: String
+    question: Question
+    language: Language
+}
+type Company{
+    id: String
+    name: String
+    questions: [Question]
+}
+
+type Tag {
+    id: String
+    name: String
+    questions: [Question]
+}
+
+type Latest{
+    compnay:Compnay,
+    timeLeatest:Int
+}
+
+type Question{
+    id: String
+    numCode: Int
+    title: String
+    hardly: Int
+    frequency:Int
+    content_cn: String
+    content_en: String
+
+    latest:[Latest]
+    tags:[Tag]
+    companys:[Company]
+    answers:[Answer]
+    
+    isCspiration
+    isHuahua
+}

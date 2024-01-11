@@ -1,0 +1,5 @@
+FROM gakaki/spring_native_maven_base:latest as builder
+
+WORKDIR /app
+COPY . .
+RUN  mvn -Pnative native:compile

@@ -1,0 +1,34 @@
+FROM gakaki/spring_base:latest as builder
+
+WORKDIR /app
+COPY . .
+RUN  gradle nativeCompile
+
+FROM debian:stable-slim
+
+COPY --from=builder /etc/passwd /etc/passwd
+COPY --from=builder /etc/group /etc/group
+
+WORKDIR /app
+EXPOSE 8080
+COPY --from=builder /app/build/native/nativeCompile/java ./
+RUN ls
+USER app:app
+ENTRYPOINT ["/app/java"]
+
+
+# below will say no such file or directory because not install musl c lib
+# can not run may be no musl comporesd size 29mb
+# FROM bellsoft/alpaquita-linux-base:stream-musl
+
+
+# ok has musl but big 180mb
+# FROM bellsoft/liberica-native-image-kit-container:jdk-17-nik-22.2-stream-musl
+
+# FROM scratch and alpine need install muslc can not run
+
+
+# FROM debian:stable-slim ok 56mb compressed ok has muslc
+`
+# muslc advantages generate smaller size binary and speed up fast in docker and arm 
+# very usage for docker and arm
