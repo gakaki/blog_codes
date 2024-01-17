@@ -6,7 +6,7 @@ const fs                = require('fs')
 const publicKey         = fs.readFileSync("publicKey.pem")
 const privateKey        = fs.readFileSync("privateKey.pem")
 
-const orderNumber               = "123456"
+const orderNumber               = "SC010421178545735680"
 
 console.log("订单orderNumber>>",orderNumber);
 

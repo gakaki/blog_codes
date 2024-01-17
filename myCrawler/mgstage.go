@@ -30,7 +30,7 @@ func getMgstageTodayURl() string {
 func getTimeYYYYMMDD() string {
 	t := time.Now() //.Add(-3600*24*time.Second)
 	return fmt.Sprintf("%d.%02d.%02d",
-		t.Year(), t.Month(), t.Day())
+		t.Year(), t.Month(), t.Day()-1)
 }
 func getTimeYYYYMMDDHHMMSS() string {
 	t := time.Now()

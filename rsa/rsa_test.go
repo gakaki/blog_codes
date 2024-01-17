@@ -24,12 +24,13 @@ func TestRsa2Rsa2PriSign(t *testing.T) {
 	publicKey := ReadToStr("./publicKey.pem")
 
 	validateCodeEncoded := ReadToStr("./validateCode.txt")
+
 	validateCode, err := url.QueryUnescape(validateCodeEncoded)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Printf("validateCode>>%s\n", validateCode)
+	fmt.Printf("validateCode>>%s len is %d\n ", validateCode, len(validateCode))
 
 	orderDig := ReadToStr("./orderDig.txt")
 	fmt.Printf("orderDig>>%s\n", orderDig)
