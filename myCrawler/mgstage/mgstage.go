@@ -1,11 +1,10 @@
-package main
+package mgstage
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"log"
-	"myCrawler/mgstage"
 	"myCrawler/utils"
 	"os"
 	"strings"
@@ -71,19 +70,19 @@ func downlaodThanSave(url string, path string) {
 	fmt.Println("download success", url, path)
 }
 
-func downloadImages(v *mgstage.Video) {
+func downloadImages(v *Video) {
 	for _, imageUrl := range v.Images {
 		downlaodThanSave(string(imageUrl), getSavePath(string(imageUrl), v.ID))
 	}
 }
 
-var queue = make(chan *mgstage.Video, 3)
-var queueVideos = make(chan *mgstage.Video, 3)
-var queueImages = make(chan *mgstage.Video, 10)
+var queue = make(chan *Video, 3)
+var queueVideos = make(chan *Video, 3)
+var queueImages = make(chan *Video, 10)
 var wg sync.WaitGroup
 
-var videoMap = map[string]*mgstage.Video{}
-var videoArray = make([]*mgstage.Video, 0)
+var videoMap = map[string]*Video{}
+var videoArray = make([]*Video, 0)
 
 func DetailPageToImagesVideo() {
 	for v := range queue {
@@ -119,7 +118,7 @@ func getList() {
 		log.Fatal(err)
 	}
 	doc.Find("div.search_list > div > ul > li").Each(func(index int, ele *goquery.Selection) {
-		v := mgstage.Video{}
+		v := Video{}
 		v.Url, _ = getVideoUrl(ele)
 		v.FullUrl = getFullUrl(v.Url)
 		v.ID = getVideoId(v.Url)
@@ -131,7 +130,7 @@ func getList() {
 	})
 
 }
-func downloadVideo(v *mgstage.Video) {
+func downloadVideo(v *Video) {
 	if v.VideoUrl != "" {
 		fmt.Printf("视频文件 %s ", v.VideoUrl)
 		downlaodThanSave(string(v.VideoUrl), getSavePath(string(v.VideoUrl), v.ID))
@@ -141,7 +140,7 @@ func downloadVideo(v *mgstage.Video) {
 	//	return
 	//}
 }
-func GetVideoMP4(v *mgstage.Video) {
+func GetVideoMP4(v *Video) {
 	toGetVideoUrl := fmt.Sprintf("https://www.mgstage.com/sampleplayer/sampleRespons.php?pid=%s", v.Pid)
 	jsonString, err := utils.RequestString(toGetVideoUrl)
 	if err == nil {
@@ -163,7 +162,7 @@ type JSONMgstageVideo struct {
 	Url string `json:"url"`
 }
 
-func getLinkByItemDoc(selectorTd string, doc *goquery.Document) mgstage.Link {
+func getLinkByItemDoc(selectorTd string, doc *goquery.Document) Link {
 	tdEle := doc.Find(selectorTd)
 	linkElem := tdEle.Find("a")
 	href, _ := linkElem.Attr("href")
@@ -174,9 +173,9 @@ func getLinkByItemDoc(selectorTd string, doc *goquery.Document) mgstage.Link {
 	if href != "" {
 		href = getFullUrl(href)
 	}
-	return mgstage.Link{text, href}
+	return Link{text, href}
 }
-func getLinkByItemSelection(selectorTd string, doc *goquery.Selection) mgstage.Link {
+func getLinkByItemSelection(selectorTd string, doc *goquery.Selection) Link {
 	linkElem := doc.Find(selectorTd)
 	href, _ := linkElem.Attr("href")
 	text := linkElem.Text()
@@ -185,7 +184,7 @@ func getLinkByItemSelection(selectorTd string, doc *goquery.Selection) mgstage.L
 	if href != "" {
 		href = getFullUrl(href)
 	}
-	return mgstage.Link{text, href}
+	return Link{text, href}
 }
 func cleanText(str string) string {
 	s := strings.TrimLeft(str, " ")
@@ -208,7 +207,7 @@ func getDocText(selector string, doc *goquery.Document) string {
 	t := doc.Find(selector).Text()
 	return cleanText(t)
 }
-func getVideoModel(v *mgstage.Video, detailDoc *goquery.Document) (*mgstage.Video, error) {
+func getVideoModel(v *Video, detailDoc *goquery.Document) (*Video, error) {
 
 	v.Title = getDocText("#center_column > div.common_detail_cover > h1", detailDoc)
 

@@ -1,7 +1,6 @@
-package main
+package scanlibs
 
 import (
-	"myCrawler/scanlibs"
 	"myCrawler/utils"
 	"runtime"
 	"sync"
@@ -12,7 +11,7 @@ import (
 func TestDownloadScanlibs(t *testing.T) {
 
 	maxWorkerCount := 2
-	queue := make(chan *scanlibs.ScanLibPage, maxWorkerCount)
+	queue := make(chan *ScanLibPage, maxWorkerCount)
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	wg := sync.WaitGroup{}
 	for i := 0; i < maxWorkerCount; i++ {

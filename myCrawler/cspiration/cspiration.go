@@ -1,11 +1,10 @@
-package main
+package cspiration
 
 import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"io/ioutil"
 	"log"
-	Cspiration "myCrawler/cspiration"
 	"myCrawler/utils"
 	"net/http"
 	"strconv"
@@ -13,7 +12,7 @@ import (
 	"time"
 )
 
-var cspirationItems = make([]*Cspiration.Item, 0)
+var cspirationItems = make([]*Item, 0)
 
 //var queueFethItems = make(chan *scanlibs.ScanLibItem, 3)
 //var queueFethItems = make(chan int, 3)
@@ -83,12 +82,12 @@ func dealPage() {
 
 }
 
-var questionDS = make([]*Cspiration.Item, 0)
-var question250 = make([]*Cspiration.Item, 0)
-var question400 = make([]*Cspiration.Item, 0)
-var questionMaps = make(map[string]*Cspiration.Item)
+var questionDS = make([]*Item, 0)
+var question250 = make([]*Item, 0)
+var question400 = make([]*Item, 0)
+var questionMaps = make(map[string]*Item)
 
-func getCommonCategoryQuestion(selector string, categoryName string, doc *goquery.Document, itemArray []*Cspiration.Item) []*Cspiration.Item {
+func getCommonCategoryQuestion(selector string, categoryName string, doc *goquery.Document, itemArray []*Item) []*Item {
 
 	doc.Find(selector).Each(func(index int, ele *goquery.Selection) {
 
@@ -99,7 +98,7 @@ func getCommonCategoryQuestion(selector string, categoryName string, doc *goquer
 
 			item := questionMaps[questionNo]
 			if item == nil {
-				item = &Cspiration.Item{}
+				item = &Item{}
 			}
 
 			item.BigCategory = categoryName
@@ -152,7 +151,7 @@ func get400Questions(doc *goquery.Document) {
 
 					item := questionMaps[firstText]
 					if item == nil {
-						item = &Cspiration.Item{}
+						item = &Item{}
 						item.BigCategory = bigCategory
 						item.Category = category
 						item.SubCategory = subCategory

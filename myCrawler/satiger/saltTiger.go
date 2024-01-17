@@ -1,10 +1,9 @@
-package main
+package Satiger
 
 import (
 	"encoding/json"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	Satiger "myCrawler/satiger"
 	"myCrawler/utils"
 	"net/url"
 	"regexp"
@@ -14,7 +13,7 @@ import (
 	"time"
 )
 
-var salttigerItems = make([]*Satiger.SatigerItem, 0)
+var salttigerItems = make([]*SatigerItem, 0)
 
 func SaltTigerAllBooks() {
 	// https://salttiger.com/archives/ 获得列表,对列表进行 并发爬取
@@ -25,7 +24,7 @@ func SaltTigerAllBooks() {
 	fmt.Println("books count ", len(salttigerItems))
 
 	maxWorkerCount := 20
-	queue := make(chan *Satiger.SatigerItem, maxWorkerCount)
+	queue := make(chan *SatigerItem, maxWorkerCount)
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	wg := sync.WaitGroup{}
 
@@ -55,7 +54,7 @@ func regexFind(regexStr string, str string) string {
 	//fmt.Println(res)
 	return res
 }
-func setDetailPage(item *Satiger.SatigerItem) {
+func setDetailPage(item *SatigerItem) {
 	fmt.Println("request page ", item.URL)
 	//need retry
 	doc, err := utils.RequestGetDocument(item.URL)
@@ -99,7 +98,7 @@ func setDetailPage(item *Satiger.SatigerItem) {
 		item.ZlibSearchUrl = fmt.Sprintf("https://zlibrary-asia.se/s/%s?", url.PathEscape(item.Title))
 
 		ele.Find("footer > a[rel*=tag]").Each(func(index int, e *goquery.Selection) {
-			tag := Satiger.Tag{}
+			tag := Tag{}
 			tag.URL, _ = e.Attr("href")
 			tag.Name = e.Text()
 			item.Tags = append(item.Tags, tag)
@@ -128,7 +127,7 @@ func GetAllBooksList() {
 
 		createdAt := ele.Find("span.car-yearmonth").Text()
 		ele.Find("ul.car-monthlisting li").Each(func(index int, ele *goquery.Selection) {
-			var item = Satiger.SatigerItem{}
+			var item = SatigerItem{}
 
 			item.Yearmonth = createdAt
 			itemA := ele.Find("a")

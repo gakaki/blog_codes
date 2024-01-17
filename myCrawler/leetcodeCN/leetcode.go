@@ -1,10 +1,9 @@
-package main
+package leetcodeCN
 
 import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"myCrawler/leetcodeCN"
 	"myCrawler/utils"
 	"net/http"
 	"os"
@@ -69,52 +68,52 @@ func writeToJSON(body []byte, json interface{}) {
 	_ = ioutil.WriteFile(fileName, body, os.ModePerm)
 }
 
-func getAllQuestionsTranslation() (leetcodeCN.QuestionCHNJSON, error) {
+func getAllQuestionsTranslation() (QuestionCHNJSON, error) {
 	body, _ := graphql(`{"operationName":"getQuestionTranslation","variables":{},"query":"query getQuestionTranslation($lang: String) {\n  translations: allAppliedQuestionTranslations(lang: $lang) {\n    title\n    questionId\n    __typename\n  }\n}\n"}`)
-	var questionCHNJSON leetcodeCN.QuestionCHNJSON
+	var questionCHNJSON QuestionCHNJSON
 	err := json.Unmarshal(body, &questionCHNJSON)
 	checkError(err)
 	writeToJSON(body, questionCHNJSON)
 	return questionCHNJSON, err
 }
 
-func getAllQuestions() (leetcodeCN.AllQuestionJSON, error) {
+func getAllQuestions() (AllQuestionJSON, error) {
 	body, _ := request("https://leetcode-cn.com/api/problems/all/", "")
-	var questionJSON leetcodeCN.AllQuestionJSON
+	var questionJSON AllQuestionJSON
 	err := json.Unmarshal(body, &questionJSON)
 	checkError(err)
 	writeToJSON(body, questionJSON)
 	return questionJSON, err
 }
-func getFavorites() (leetcodeCN.FavoriteJSON, error) {
+func getFavorites() (FavoriteJSON, error) {
 	body, _ := request("https://leetcode-cn.com/problems/api/favorites/", "")
-	var favoriteJSON leetcodeCN.FavoriteJSON
+	var favoriteJSON FavoriteJSON
 	err := json.Unmarshal(body, &favoriteJSON)
 	checkError(err)
 	writeToJSON(body, favoriteJSON)
 	return favoriteJSON, err
 }
-func getTags() (leetcodeCN.TagJSON, error) {
+func getTags() (TagJSON, error) {
 	body, _ := request("https://leetcode-cn.com/problems/api/tags/", "")
-	var tagJSON leetcodeCN.TagJSON
+	var tagJSON TagJSON
 	err := json.Unmarshal(body, &tagJSON)
 	checkError(err)
 	writeToJSON(body, tagJSON)
 	return tagJSON, err
 }
 
-func getCompanys() (leetcodeCN.CompanyJSON, error) {
+func getCompanys() (CompanyJSON, error) {
 	body, _ := graphql(`{"operationName":"getHotCompanies","variables":{"onlyCompanyCards":true},"query":"query getHotCompanies($onlyCompanyCards: Boolean!) {\n  interviewHotCards(onlyCompanyCards: $onlyCompanyCards) {\n    id\n    numQuestions\n    company {\n      name\n      slug\n      imgUrl\n      __typename\n    }\n    __typename\n  }\n}\n"}`)
-	var companyJSON leetcodeCN.CompanyJSON
+	var companyJSON CompanyJSON
 	err := json.Unmarshal(body, &companyJSON)
 	checkError(err)
 	writeToJSON(body, companyJSON)
 	return companyJSON, err
 }
 
-func getCompnayQuestions() (leetcodeCN.CompanyQuestionJSON, error) {
+func getCompnayQuestions() (CompanyQuestionJSON, error) {
 	body, _ := graphql(`{"operationName":"companyTag","variables":{"slug":"bytedance"},"query":"query companyTag($slug: String!) {\n  interviewCard(companySlug: $slug) {\n    id\n    isFavorite\n    isPremiumOnly\n    privilegeExpiresAt\n    jobsCompany {\n      name\n      jobPostingNum\n      isVerified\n      description\n      logo\n      logoPath\n      postingTypeCounts {\n        count\n        postingType\n        __typename\n      }\n      industryDisplay\n      scaleDisplay\n      financingStageDisplay\n      website\n      legalName\n      __typename\n    }\n    __typename\n  }\n  interviewCompanyOptions(query: $slug) {\n    id\n    __typename\n  }\n  companyTag(slug: $slug) {\n    name\n    id\n    imgUrl\n    translatedName\n    frequencies\n    questions {\n      title\n      translatedTitle\n      titleSlug\n      questionId\n      stats\n      status\n      questionFrontendId\n      difficulty\n      frequencyTimePeriod\n      topicTags {\n        id\n        name\n        slug\n        translatedName\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n  jobsCompany(companySlug: $slug) {\n    name\n    legalName\n    logo\n    description\n    website\n    industryDisplay\n    scaleDisplay\n    financingStageDisplay\n    isVerified\n    __typename\n  }\n}\n"}`)
-	var companyQuestionJSON leetcodeCN.CompanyQuestionJSON
+	var companyQuestionJSON CompanyQuestionJSON
 	//fmt.Println(string(body))
 	err := json.Unmarshal(body, &companyQuestionJSON)
 	checkError(err)
@@ -122,11 +121,11 @@ func getCompnayQuestions() (leetcodeCN.CompanyQuestionJSON, error) {
 	return companyQuestionJSON, err
 }
 
-func getQuestionDetail(titleSlug string) (leetcodeCN.QuestionJSON, error) {
+func getQuestionDetail(titleSlug string) (QuestionJSON, error) {
 	queryStatement := fmt.Sprintf("{\"operationName\":\"questionData\",\"variables\":{\"titleSlug\":\"%s\"},\"query\":\"query questionData($titleSlug: String!) {\\n  question(titleSlug: $titleSlug) {\\n    questionId\\n    questionFrontendId\\n    boundTopicId\\n    title\\n    titleSlug\\n    content\\n    translatedTitle\\n    translatedContent\\n    isPaidOnly\\n    difficulty\\n    likes\\n    dislikes\\n    isLiked\\n    similarQuestions\\n    contributors {\\n      username\\n      profileUrl\\n      avatarUrl\\n      __typename\\n    }\\n    langToValidPlayground\\n    topicTags {\\n      name\\n      slug\\n      translatedName\\n      __typename\\n    }\\n    companyTagStats\\n    codeSnippets {\\n      lang\\n      langSlug\\n      code\\n      __typename\\n    }\\n    stats\\n    hints\\n    solution {\\n      id\\n      canSeeDetail\\n      __typename\\n    }\\n    status\\n    sampleTestCase\\n    metaData\\n    judgerAvailable\\n    judgeType\\n    mysqlSchemas\\n    enableRunCode\\n    envInfo\\n    book {\\n      id\\n      bookName\\n      pressName\\n      source\\n      shortDescription\\n      fullDescription\\n      bookImgUrl\\n      pressImgUrl\\n      productUrl\\n      __typename\\n    }\\n    isSubscribed\\n    isDailyQuestion\\n    dailyRecordStatus\\n    editorType\\n    ugcQuestionId\\n    style\\n    __typename\\n  }\\n}\\n\"}", titleSlug)
 	body, _ := graphql(queryStatement)
 	fmt.Println(string(body))
-	var questionJSON leetcodeCN.QuestionJSON
+	var questionJSON QuestionJSON
 	err := json.Unmarshal(body, &questionJSON)
 	checkError(err)
 	utils.WriteToJSONByFileName(body, fmt.Sprintf("%s.json", titleSlug))

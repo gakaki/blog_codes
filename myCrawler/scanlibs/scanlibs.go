@@ -1,9 +1,8 @@
-package main
+package scanlibs
 
 import (
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"myCrawler/scanlibs"
 	"myCrawler/utils"
 	"strconv"
 	"strings"
@@ -15,10 +14,10 @@ func CheckError(err error) {
 	}
 }
 
-func getEveryPageItems(doc *goquery.Document) []*scanlibs.ScanLibItem {
-	scanlibItems := make([]*scanlibs.ScanLibItem, 0)
+func getEveryPageItems(doc *goquery.Document) []*ScanLibItem {
+	scanlibItems := make([]*ScanLibItem, 0)
 	doc.Find("article").Each(func(index int, ele *goquery.Selection) {
-		var item = &scanlibs.ScanLibItem{}
+		var item = &ScanLibItem{}
 		item.ID, _ = ele.Attr("id")
 		item.URL, _ = ele.Find("a").Attr("href")
 		item.CreatedAt, _ = ele.Find("time").Attr("datetime")
@@ -35,7 +34,7 @@ func makePageUrl(pageIndex int) string {
 	return url
 }
 
-func setEveryPage(page *scanlibs.ScanLibPage) {
+func setEveryPage(page *ScanLibPage) {
 	fmt.Println("request page ", page.Index)
 	doc, err := utils.RequestGetDocument(page.URL)
 	if err != nil {
@@ -54,7 +53,7 @@ func parseThanGetLastPageIndex(doc *goquery.Document) int {
 	return d
 }
 
-func getTotalPages() []*scanlibs.ScanLibPage {
+func getTotalPages() []*ScanLibPage {
 	url := "https://scanlibs.com/page/1"
 	doc, err := utils.RequestGetDocument(url)
 	if err != nil {
@@ -63,9 +62,9 @@ func getTotalPages() []*scanlibs.ScanLibPage {
 	}
 
 	totalPageIndex := parseThanGetLastPageIndex(doc)
-	scanLibPages := make([]*scanlibs.ScanLibPage, 0)
+	scanLibPages := make([]*ScanLibPage, 0)
 	for i := 1; i <= totalPageIndex; i++ {
-		page := &scanlibs.ScanLibPage{}
+		page := &ScanLibPage{}
 		page.Index = i
 		page.URL = makePageUrl(i)
 		scanLibPages = append(scanLibPages, page)
