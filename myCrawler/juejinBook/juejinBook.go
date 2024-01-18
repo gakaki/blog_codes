@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"myCrawler/utils"
 	"net/http"
@@ -228,15 +229,61 @@ func (j *Juejinxiaoce2Markdown) DealABook(bookID string) error {
 	return nil
 }
 
-// SaveMarkdown save markdown.
-func (j *Juejinxiaoce2Markdown) SaveMarkdown(markdownFilePath, sectionImgDir, markdownRelativeImgDir, markdownStr string) {
-	imgURLs := j.ImgPattern.FindAllString(markdownStr, -1)
-	for imgIndex, imgURL := range imgURLs {
-		newImgURL := strings.ReplaceAll(imgURL, "\n", "")
-		if strings.HasPrefix(newImgURL, "//") {
-			newImgURL = "https:" + newImgURL
+func FindImageUrls(htmls string) []string {
+	//imgPattern := regexp.MustCompile(`!\[.*?\]\((.*?)\)`)
+	var imgRE = regexp.MustCompile(`<img[^>]+\bsrc=["']([^"']+)["']`)
+	imgs := imgRE.FindAllStringSubmatch(htmls, -1)
+	out := make([]string, 0)
+	for _, img := range imgs {
+		if strings.Contains(img[1], "https") {
+			out = append(out, img[1])
 		}
-		imgFileName := fmt.Sprintf("%d%s", imgIndex+1, filepath.Ext(newImgURL))
-		fmt.Println(imgFileName)
+	}
+	return out
+}
+
+func (j *Juejinxiaoce2Markdown) SaveMarkdown(markdownFilePath string, sectionImgDir string, markdownRelativeImgDir string, markdownStr string) {
+
+	imgUrls := FindImageUrls(markdownStr)
+	for imgIndex, imgUrl := range imgUrls {
+		newImgUrl := strings.TrimSpace(imgUrl) // Remove newlines and extra spaces
+		if strings.HasPrefix(newImgUrl, "//") {
+			newImgUrl = "https:" + newImgUrl // Add https:// if missing
+		}
+
+		suffix := filepath.Ext(newImgUrl)
+		suffix = ".png"                                                         // Get file extension
+		imgFileName := fmt.Sprintf("%d%s", imgIndex+1, suffix)                  // Generate filename
+		mdRelativeImgPath := filepath.Join(markdownRelativeImgDir, imgFileName) // Relative path for Markdown
+		imgSavePath := filepath.Join(sectionImgDir, imgFileName)                // Full path to save image
+
+		// Download image
+		resp, err := http.Get(newImgUrl)
+		if err != nil {
+			fmt.Println("Error downloading image:", err)
+			continue // Skip to the next image if download fails
+		}
+		defer resp.Body.Close()
+
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			fmt.Println("Error reading image:", err)
+			continue
+		}
+
+		err = os.WriteFile(imgSavePath, body, 0644) // Save image
+		if err != nil {
+			fmt.Println("Error saving image:", err)
+			continue
+		}
+
+		// Replace URL in Markdown string with relative path
+		markdownStr = strings.ReplaceAll(markdownStr, imgUrl, mdRelativeImgPath)
+	}
+
+	// Save Markdown file
+	err := os.WriteFile(markdownFilePath, []byte(markdownStr), 0644)
+	if err != nil {
+		fmt.Println("Error saving Markdown file:", err)
 	}
 }
