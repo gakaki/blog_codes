@@ -1,13 +1,27 @@
 package juejinBook
 
 import (
+	"fmt"
 	"testing"
 )
 
-func TestNewJuejinxiaoce2Markdown(t *testing.T) {
+func TestGetAllXiaoces(t *testing.T) {
+	GetAllBookListSortLatestSaveToJSON()
+}
 
-	helper = Juejinxiaoce2Markdown(config)
-	helper.main()
+func TestDownload2Markdown(t *testing.T) {
 
-	sessionId := "
+	c := Config{
+		Sessionid: "a115bed3665f8f179576610d73a3eae0",
+		BookIDs: []string{
+			"7302990019642261567",
+		},
+		SaveDir: "",
+	}
+
+	juejin, err := NewConfig(c)
+	if err != nil {
+		fmt.Println(err)
+	}
+	juejin.Download()
 }

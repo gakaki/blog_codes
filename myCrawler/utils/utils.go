@@ -106,3 +106,8 @@ func RequestGetDocument(url string) (*goquery.Document, error) {
 	}
 	return doc, nil
 }
+
+func fromJSON[T interface{}](input string) (t T) {
+	json.Unmarshal([]byte((input)), &t)
+	return t
+}
