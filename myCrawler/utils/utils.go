@@ -43,7 +43,7 @@ func GetCommonHeaders() map[string]string {
 	return map[string]string{
 		//"pragma":        "no-cache",
 		//"cache-control": "no-cache",
-		"User-Agent": `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36`,
+		"User-Agent": `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36`,
 		//"Authorization": "Bearer NjM0MzQ5MDIxMzg4OpTbOJlBQ8pQNsF078ecJkGtwTCb",
 		"Cookie": "uuid=67b2a73cbeeac80f3cc1f7538299bc98; _ga=GA1.2.1416779059.1704272338; _ga_XGPRLSR61S=GS1.2.1705076071.9.1.1705076333.60.0.0; _ga_92ER0V7HV2=GS1.2.1705076071.9.1.1705076303.60.0.0; __ulfpc=202401031658581756; adc=1; PHPSESSID=hal6k2uoeqv6102li0teekjn51; coc=1; bWdzdGFnZS5jb20%3D-_lr_uf_-r2icil=ab59e25f-29fd-4ae0-9c1d-dc67b430d3d9; _gid=GA1.2.655454423.1705076080; bWdzdGFnZS5jb20%3D-_lr_tabs_-r2icil%2Fmgs={%22sessionID%22:0%2C%22recordingID%22:%225-44485d2a-68d0-40e5-bbb2-4ce4114caa2a%22%2C%22webViewID%22:null%2C%22lastActivity%22:1705076298875}; bWdzdGFnZS5jb20%3D-_lr_hb_-r2icil%2Fmgs={%22heartbeat%22:1705076337132}; _gat_UA-58252858-1=1; _gat_UA-158726521-1=1",
 
@@ -61,11 +61,11 @@ func GetHttpClient() *resty.Client {
 	client.SetHeaders(GetCommonHeaders())
 	client.SetContentLength(true)
 
-	client.SetProxy("socks5://127.0.0.1:7890")
+	//client.SetProxy("socks5://127.0.0.1:7890")
 
 	client.
 		SetRetryCount(5).
-		SetRetryWaitTime(4 * time.Second).
+		SetRetryWaitTime(10 * time.Second).
 		SetDebug(false)
 
 	return client
@@ -93,6 +93,33 @@ func RequestString(url string) (string, error) {
 	}
 }
 
+func RequestThanSaveImage(url string, saveImagePath string) error {
+
+	client := resty.New()
+	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
+	client.SetTimeout(10 * time.Second)
+	resp, err := client.
+		SetRetryCount(5).
+		SetRetryWaitTime(10 * time.Second).
+		SetDebug(false).
+		R().Get(url)
+
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode() == http.StatusOK {
+		err = os.WriteFile(saveImagePath, resp.Body(), 0644) // Save image
+		if err != nil {
+			fmt.Println("Error saving image:", saveImagePath, url, err)
+			return err
+		}
+	} else {
+		fmt.Println(fmt.Sprintf("url is %s ,status code is %d %s", url, resp.StatusCode(), string(resp.Body())))
+		RequestThanSaveImage(url, saveImagePath)
+	}
+	return nil
+}
+
 func RequestGetDocument(url string) (*goquery.Document, error) {
 	body, err := RequestString(url)
 	if err != nil {
@@ -107,7 +134,40 @@ func RequestGetDocument(url string) (*goquery.Document, error) {
 	return doc, nil
 }
 
-func fromJSON[T interface{}](input string) (t T) {
-	json.Unmarshal([]byte((input)), &t)
-	return t
+type Request struct {
+	CategoryID int
+	Cursor     string
+	Sort       int
+	IsVIP      bool
+	Limit      int
+}
+
+func PostToStructInputStruct[T interface{}](url string, data interface{}, sessionId string) (t T, err error) {
+	payload, err := json.Marshal(data)
+	return PostToStructInputBytes[T](url, payload, sessionId)
+}
+func PostToStructInputBytes[T interface{}](url string, payloadBytes []byte, sessionId string) (t T, err error) {
+	resp, err := GetHttpClient().R().
+		//EnableTrace().
+		SetHeader("Content-Type", "application/json").
+		SetHeader("Cookie", "sessionid="+sessionId).
+		SetBody(payloadBytes).
+		Post(url)
+
+	if err != nil {
+		return t, err
+	}
+	//fmt.Println("Response Info:")
+	//fmt.Println("  Error      :", err)
+	//fmt.Println("  Status Code:", resp.StatusCode())
+
+	if resp.StatusCode() == http.StatusOK {
+		//bodyString := string(resp.Body())
+		json.Unmarshal(resp.Body(), &t)
+		return t, nil
+	} else {
+		fmt.Println("错误号码:")
+		panic(fmt.Sprintf("url is %s ,status code is %d %s", url, resp.StatusCode(), string(resp.Body())))
+		return t, err
+	}
 }
