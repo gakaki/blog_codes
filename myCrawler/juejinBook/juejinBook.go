@@ -191,22 +191,64 @@ func (j *Juejinxiaoce2Markdown) DownloadOneBook(bookID string) error {
 	return nil
 }
 
-func FindImageUrls(htmls string) []string {
-	//imgPattern := regexp.MustCompile(`!\[.*?\]\((.*?)\)`)
-	var imgRE = regexp.MustCompile(`<img[^>]+\bsrc=["']([^"']+)["']`)
+func FindImageUrls(sectionIndex int, htmls string) []string {
+	if sectionIndex == 4 {
+		fmt.Println(sectionIndex)
+	}
+	imgRE := regexp.MustCompile(`<img[^>]+\bsrc=["']([^"']+)["']`)
 	imgs := imgRE.FindAllStringSubmatch(htmls, -1)
 	out := make([]string, 0)
 	for _, img := range imgs {
-		if strings.Contains(img[1], "https") {
-			out = append(out, img[1])
+		if strings.Contains(img[1], "http") {
+			out = append(out, strings.Replace(img[1], "\\", "", -1))
 		}
 	}
+	if len(out) <= 0 {
+		imgRE = regexp.MustCompile(`https://.*?\.(jpg|jpeg|gif|image|awebp|webp)`)
+		imgs := imgRE.FindAllStringSubmatch(htmls, -1)
+		out = make([]string, 0)
+		for _, img := range imgs {
+			if strings.Contains(img[0], "http") {
+				out = append(out, strings.Replace(img[0], "\\", "", -1))
+
+			}
+		}
+	}
+
 	return out
 }
 
 func (j *Juejinxiaoce2Markdown) SaveMarkdown(sectionIndex int, markdownFilePath string, sectionImgDir string, markdownRelativeImgDir string, markdownStr string) {
 
-	imgUrls := FindImageUrls(markdownStr)
+	imgUrls := FindImageUrls(sectionIndex, markdownStr)
+
+	// 并发 下载
+	fmt.Println("sectionIndex images download count ", len(imgUrls))
+
+	type Image struct {
+		imgUrl        string
+		saveImagePath string
+	}
+	maxWorkerCount := 20
+	queue := make(chan *Image, maxWorkerCount)
+	runtime.GOMAXPROCS(runtime.NumCPU())
+	wg := sync.WaitGroup{}
+
+	for i := 0; i < maxWorkerCount; i++ {
+		go func() {
+			defer wg.Done()
+			wg.Add(1)
+			for image := range queue {
+				// Download image
+				err := utils.RequestThanSaveImage(image.imgUrl, image.saveImagePath)
+				if err != nil {
+					fmt.Println("Error downloading image:", err)
+				}
+				//time.Sleep(time.Second * 1)
+			}
+		}()
+	}
+
 	for imgIndex, imgUrl := range imgUrls {
 		newImgUrl := strings.TrimSpace(imgUrl) // Remove newlines and extra spaces
 		if strings.HasPrefix(newImgUrl, "//") {
@@ -218,15 +260,15 @@ func (j *Juejinxiaoce2Markdown) SaveMarkdown(sectionIndex int, markdownFilePath 
 		imgFileName := fmt.Sprintf("%d%s", imgIndex+1, suffix)                  // Generate filename
 		mdRelativeImgPath := filepath.Join(markdownRelativeImgDir, imgFileName) // Relative path for Markdown
 		imgSavePath := filepath.Join(sectionImgDir, imgFileName)                // Full path to save image
-
-		// Download image
-		err := utils.RequestThanSaveImage(newImgUrl, imgSavePath)
-		if err != nil {
-			fmt.Println("Error downloading image:", err)
-		}
 		// Replace URL in Markdown string with relative path
 		markdownStr = strings.ReplaceAll(markdownStr, imgUrl, mdRelativeImgPath)
+		queue <- &Image{
+			imgUrl:        newImgUrl,
+			saveImagePath: imgSavePath,
+		}
 	}
+	close(queue)
+	wg.Wait()
 
 	err := os.WriteFile(markdownFilePath, []byte(markdownStr), 0644)
 	if err != nil {

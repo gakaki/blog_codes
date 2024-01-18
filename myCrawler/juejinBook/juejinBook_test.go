@@ -20,7 +20,9 @@ func TestDownload2Markdown(t *testing.T) {
 	c := Config{
 		Sessionid: "43680406158c713253e8bfe966d70f80",
 		BookIDs: []string{
-			"7302990019642261567",
+			//"7302990019642261567",
+			//"6918979822425210891", // 0 打造通用型低
+			"7202598408815640631", //前端依赖治理
 		},
 		SaveDir: "",
 	}
@@ -43,7 +45,7 @@ func TestParseMarkdownImagePath(t *testing.T) {
 	//	url := match[1]
 	//	fmt.Println(url)
 	//}
-	images := FindImageUrls(text)
+	images := FindImageUrls(1, text)
 	fmt.Println(images)
 }
 
