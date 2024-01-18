@@ -2,6 +2,12 @@ package juejinBook
 
 import (
 	"fmt"
+	"io/fs"
+	"log"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -41,4 +47,34 @@ func TestParseMarkdownImagePath(t *testing.T) {
 	fmt.Println(images)
 }
 
-//.image#?w=1486&h=1193&s=53343&e=png&a=1&b=546ec6
+func TestRenderPDF(t *testing.T) {
+	//brew install pandoc
+	//brew install --cask basictex
+
+	// 遍历文件夹
+	filepath.Walk("./book", func(path string, info fs.FileInfo, err error) error {
+		if info.IsDir() == false && filepath.Ext(info.Name()) == ".md" {
+			// 获取文件名
+			fileName := filepath.Base(info.Name())
+			// 切换到当前文件夹
+			os.Chdir(filepath.Dir(path))
+
+			newFileName := strings.Replace(fileName, filepath.Ext(fileName), "", 1)
+			// 打印转换开始信息
+			fmt.Println("转换开始：" + "pandoc " + fileName + " -o " + newFileName + ".pdf")
+
+			// 调用 pandoc 进行格式转换
+			cmd := exec.Command(fmt.Sprintf("pandoc %s -o %s", fileName, newFileName))
+			out, err := cmd.CombinedOutput()
+			if err != nil {
+				fmt.Printf("combined out:\n%s\n", string(out))
+				log.Fatalf("cmd.Run() failed with %s\n", err)
+			}
+
+			// 打印转换完成信息
+			fmt.Println("转换完成...")
+		}
+		return err
+	})
+
+}
