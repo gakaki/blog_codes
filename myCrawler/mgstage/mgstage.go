@@ -22,15 +22,15 @@ func check(err error) {
 }
 
 func getMgstageTodayURl() string {
-	yyyymmdd := getTimeYYYYMMDD()
-	url := "https://www.mgstage.com/search/cSearch.php?search_word=&sale_start_range=%s-%s&sort=new&list_cnt=120&type=top"
-	return fmt.Sprintf(url, yyyymmdd, yyyymmdd)
-}
-func getTimeYYYYMMDD() string {
 	t := time.Now() //.Add(-3600*24*time.Second)
-	return fmt.Sprintf("%d.%02d.%02d",
+	yesterDay := fmt.Sprintf("%d.%02d.%02d",
 		t.Year(), t.Month(), t.Day()-1)
+	today := fmt.Sprintf("%d.%02d.%02d",
+		t.Year(), t.Month(), t.Day())
+	url := "https://www.mgstage.com/search/cSearch.php?search_word=&sale_start_range=%s-%s&sort=new&list_cnt=120&type=top"
+	return fmt.Sprintf(url, yesterDay, today)
 }
+
 func getTimeYYYYMMDDHHMMSS() string {
 	t := time.Now()
 	return fmt.Sprintf("%d-%02d-%02dT %02d:%02d:%02d",
@@ -43,7 +43,7 @@ func getSavePath(url string, id string) string {
 
 	fileDir := fmt.Sprintf("assets/%s", id)
 	err := os.Mkdir(fileDir, os.ModePerm)
-	checkError(err)
+	utils.CheckError(err)
 	savePath := fmt.Sprintf("assets/%s/%s", id, urlSplits[len(urlSplits)-1])
 	return savePath
 }

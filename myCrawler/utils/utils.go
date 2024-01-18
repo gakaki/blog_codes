@@ -45,7 +45,7 @@ func GetCommonHeaders() map[string]string {
 		//"cache-control": "no-cache",
 		"User-Agent": `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36`,
 		//"Authorization": "Bearer NjM0MzQ5MDIxMzg4OpTbOJlBQ8pQNsF078ecJkGtwTCb",
-		"Cookie": "uuid=67b2a73cbeeac80f3cc1f7538299bc98; _ga=GA1.2.1416779059.1704272338; _ga_XGPRLSR61S=GS1.2.1705076071.9.1.1705076333.60.0.0; _ga_92ER0V7HV2=GS1.2.1705076071.9.1.1705076303.60.0.0; __ulfpc=202401031658581756; adc=1; PHPSESSID=hal6k2uoeqv6102li0teekjn51; coc=1; bWdzdGFnZS5jb20%3D-_lr_uf_-r2icil=ab59e25f-29fd-4ae0-9c1d-dc67b430d3d9; _gid=GA1.2.655454423.1705076080; bWdzdGFnZS5jb20%3D-_lr_tabs_-r2icil%2Fmgs={%22sessionID%22:0%2C%22recordingID%22:%225-44485d2a-68d0-40e5-bbb2-4ce4114caa2a%22%2C%22webViewID%22:null%2C%22lastActivity%22:1705076298875}; bWdzdGFnZS5jb20%3D-_lr_hb_-r2icil%2Fmgs={%22heartbeat%22:1705076337132}; _gat_UA-58252858-1=1; _gat_UA-158726521-1=1",
+		"Cookie": "PHPSESSID=ciek7ijvn0vgedjbq2vak4e114; uuid=ce12aa6efbf35ba1eac11b1e69b279b4; coc=1; _ga=GA1.2.1193284767.1703415248; __ulfpc=202312241854081801; bWdzdGFnZS5jb20%3D-_lr_uf_-r2icil=81b78c30-df88-44fd-88dd-d4729b88b373; adc=1; _gid=GA1.2.1824065489.1705508051; _gat_UA-158726521-1=1; _gat_UA-58252858-1=1; bWdzdGFnZS5jb20%3D-_lr_tabs_-r2icil%2Fmgs={%22sessionID%22:0%2C%22recordingID%22:%225-eb6008d2-2a33-4d56-b256-1c9025f69e6c%22%2C%22webViewID%22:null%2C%22lastActivity%22:1705587724057}; bWdzdGFnZS5jb20%3D-_lr_hb_-r2icil%2Fmgs={%22heartbeat%22:1705587724057}; _ga_XGPRLSR61S=GS1.2.1705585804.8.1.1705587754.25.0.0; _ga_92ER0V7HV2=GS1.2.1705587719.12.1.1705587754.25.0.0",
 
 		//"accept-encoding": "gzip, deflate, br",
 		//"Content-Type":    "application/json",
@@ -61,7 +61,7 @@ func GetHttpClient() *resty.Client {
 	client.SetHeaders(GetCommonHeaders())
 	client.SetContentLength(true)
 
-	//client.SetProxy("socks5://127.0.0.1:7890")
+	client.SetProxy("socks5://127.0.0.1:7890")
 
 	client.
 		SetRetryCount(5).
@@ -92,7 +92,11 @@ func RequestString(url string) (string, error) {
 		return "", err
 	}
 }
-
+func CheckError(err error) {
+	if err != nil {
+		fmt.Printf("%d", err)
+	}
+}
 func RequestThanSaveImage(url string, saveImagePath string) error {
 
 	client := resty.New()
