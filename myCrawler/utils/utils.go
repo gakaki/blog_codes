@@ -87,8 +87,7 @@ func RequestString(url string) (string, error) {
 		bodyString := string(resp.Body())
 		return bodyString, nil
 	} else {
-		fmt.Println("错误号码:")
-		panic(fmt.Sprintf("url is %s ,status code is %d %s", url, resp.StatusCode(), string(resp.Body())))
+		panic(fmt.Sprintf("错误号码: url is %s ,status code is %d %s", url, resp.StatusCode(), string(resp.Body())))
 		return "", err
 	}
 }
@@ -98,13 +97,14 @@ func CheckError(err error) {
 	}
 }
 func RequestThanSaveImage(url string, saveImagePath string) error {
-
+	//fmt.Println("start download image ", url)
 	client := resty.New()
 	client.SetTLSClientConfig(&tls.Config{InsecureSkipVerify: true})
-	client.SetTimeout(10 * time.Second)
+	client.SetTimeout(20 * time.Second)
+	//client.SetContentLength(true)
 	resp, err := client.
-		SetRetryCount(5).
-		SetRetryWaitTime(10 * time.Second).
+		SetRetryCount(4).
+		SetRetryWaitTime(20 * time.Second).
 		SetDebug(false).
 		R().Get(url)
 
@@ -118,8 +118,8 @@ func RequestThanSaveImage(url string, saveImagePath string) error {
 			return err
 		}
 	} else {
-		fmt.Println(fmt.Sprintf("url is %s ,status code is %d %s", url, resp.StatusCode(), string(resp.Body())))
-		RequestThanSaveImage(url, saveImagePath)
+		fmt.Println(fmt.Sprintf("图片返回非200 url is %s ,status code is %d %s", url, resp.StatusCode(), string(resp.Body())))
+		//RequestThanSaveImage(url, saveImagePath)
 	}
 	return nil
 }

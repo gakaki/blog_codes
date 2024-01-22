@@ -12,7 +12,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
 )
 
 const (
@@ -113,7 +112,7 @@ func (j *Juejinxiaoce2Markdown) Download() {
 	// 并发 下载
 	fmt.Println("books need to download count ", len(j.BookIDs))
 
-	maxWorkerCount := 20
+	maxWorkerCount := 30
 	queue := make(chan string, maxWorkerCount)
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	wg := sync.WaitGroup{}
@@ -127,7 +126,6 @@ func (j *Juejinxiaoce2Markdown) Download() {
 				if err != nil {
 					fmt.Println("Error", err)
 				}
-				time.Sleep(time.Second * 1)
 			}
 		}()
 	}
@@ -223,13 +221,13 @@ func (j *Juejinxiaoce2Markdown) SaveMarkdown(sectionIndex int, markdownFilePath 
 	imgUrls := FindImageUrls(sectionIndex, markdownStr)
 
 	// 并发 下载
-	fmt.Println("sectionIndex images download count ", len(imgUrls))
+	fmt.Println("sectionIndex images download count ", sectionIndex, len(imgUrls))
 
 	type Image struct {
 		imgUrl        string
 		saveImagePath string
 	}
-	maxWorkerCount := 20
+	maxWorkerCount := 8
 	queue := make(chan *Image, maxWorkerCount)
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	wg := sync.WaitGroup{}
