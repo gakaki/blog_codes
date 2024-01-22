@@ -1,1 +1,1 @@
-# blog_codes
+# [gakaki TechKnowledge Blog](https://blog.gakaki.com)
