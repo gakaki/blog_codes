@@ -189,10 +189,26 @@ func (j *Juejinxiaoce2Markdown) DownloadOneBook(bookID string) error {
 	return nil
 }
 
+func GetMarkDownImageUrl(markDown string) []string {
+	images := make([]string, 0)
+	// 定义正则表达式，匹配Markdown中的图片URL
+	re := regexp.MustCompile(`!\[.*\]\((https?://[^\s]+)\)`)
+	// 使用FindAllStringSubmatch函数查找所有匹配项
+	matches := re.FindAllStringSubmatch(markDown, -1)
+	// 遍历匹配项，提取图片URL
+	for _, match := range matches {
+		if len(match) > 1 {
+			fmt.Println(match[1]) // 打印图片URL
+			images = append(images, match[1])
+		}
+	}
+	return images
+}
 func FindImageUrls(sectionIndex int, htmls string) []string {
 	if sectionIndex == 4 {
 		fmt.Println(sectionIndex)
 	}
+
 	imgRE := regexp.MustCompile(`<img[^>]+\bsrc=["']([^"']+)["']`)
 	imgs := imgRE.FindAllStringSubmatch(htmls, -1)
 	out := make([]string, 0)
@@ -212,6 +228,8 @@ func FindImageUrls(sectionIndex int, htmls string) []string {
 			}
 		}
 	}
+
+	out = GetMarkDownImageUrl(htmls)
 
 	return out
 }
