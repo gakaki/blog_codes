@@ -16,6 +16,8 @@ func TestGetLinkByItemDoc(t *testing.T) {
 
 func TestDownload(t *testing.T) {
 
+	createDirIfNotExist()
+
 	go func() {
 		getList()
 	}()

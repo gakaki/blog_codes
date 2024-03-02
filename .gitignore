@@ -4,3 +4,9 @@ target
 Cargo.lock
 /myCrawler/juejinBook/juejin_book.json
 /myCrawler/juejinBook/book
+._*
+go/juejin_xiaoce_milvus/volumes/milvus/
+myCrawler/assets
+._.DS_Store
+._*
+volumes

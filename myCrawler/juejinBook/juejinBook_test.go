@@ -18,7 +18,7 @@ func TestGetAllXiaoces(t *testing.T) {
 func TestDownload2Markdown(t *testing.T) {
 
 	c := Config{
-		Sessionid: "cd1c880a324154ad53cd98dfbc8606f4",
+		Sessionid: "a1deccf2241693a29d8b7b9b316a8fb3",
 		BookIDs: []string{
 			//"7302990019642261567",
 			//"6918979822425210891", // 0 打造通用型低
@@ -27,6 +27,7 @@ func TestDownload2Markdown(t *testing.T) {
 			//"7288940354408022074", //web动画之旅
 			"7294082310658326565", //react 通关秘籍
 			//"7306163555449962533", //前端工程体验优化实战
+			//"6844733800300150797", //前端算法与数据结构面试：底层逻辑解读与大厂真题训练
 		},
 		SaveDir: "",
 	}

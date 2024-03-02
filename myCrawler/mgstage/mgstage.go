@@ -130,7 +130,18 @@ func getList() {
 	})
 
 }
+func createDirIfNotExist() {
+	dirName := "assets"
+	_, err := os.ReadDir(dirName)
+	if os.IsNotExist(err) {
+		err := os.MkdirAll(dirName, 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+}
 func downloadVideo(v *Video) {
+
 	if v.VideoUrl != "" {
 		fmt.Printf("视频文件 %s ", v.VideoUrl)
 		downlaodThanSave(string(v.VideoUrl), getSavePath(string(v.VideoUrl), v.ID))

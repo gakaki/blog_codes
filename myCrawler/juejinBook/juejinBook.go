@@ -62,7 +62,8 @@ func NewConfig(config Config) (*Juejinxiaoce2Markdown, error) {
 	if len(config.BookIDs) == 0 {
 		return nil, fmt.Errorf("bookIDs is empty")
 	}
-	pwd := os.Getenv("PWD")
+	pwd, _ := os.Getwd()
+
 	if pwd == "" {
 		return nil, fmt.Errorf("PWD is empty")
 	}
